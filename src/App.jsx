@@ -100,53 +100,6 @@ function App() {
     const [llmLoading, setLlmLoading] = useState(false);
     const [llmError, setLlmError] = useState(null);
 
-    const callGeminiApi = async (prompt, title) => {
-      setLlmLoading(true);
-      setLlmError(null);
-      setLlmModalTitle(title);
-      setShowLlmModal(true);
-      setLlmModalContent(''); // Clear previous content
-
-      let chatHistory = [];
-      chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-      const payload = { contents: chatHistory };
-      const apiKey = ""; // Gemini API key (Canvas will provide it at runtime)
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const result = await response.json();
-
-        if (result.candidates && result.candidates.length > 0 &&
-            result.candidates[0].content && result.candidates[0].content.parts &&
-            result.candidates[0].content.parts.length > 0) {
-          setLlmModalContent(result.candidates[0].content.parts[0].text);
-        } else {
-          setLlmError('Could not generate content. Please try again.');
-          console.error("Gemini API response format unexpected:", result);
-        }
-      } catch (err) {
-        setLlmError('Failed to connect to Gemini API. Please try again later.');
-        console.error("Gemini API call error:", err);
-      } finally {
-        setLlmLoading(false);
-      }
-    };
-
-    const handleGetPlotSummary = () => {
-      const prompt = `Give me a detailed, engaging plot summary for the movie "${movie.Title}" (${movie.Year}).`;
-      callGeminiApi(prompt, `Plot Summary for "${movie.Title}"`);
-    };
-
-    const handleGenerateReview = () => {
-      const prompt = `Write a concise, interesting review (positive or critical) for the movie "${movie.Title}" (${movie.Year}). Focus on its key aspects.`;
-      callGeminiApi(prompt, `Review for "${movie.Title}"`);
-    };
-
     return (
       <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden relative transform transition-transform duration-300 hover:scale-105">
         {/* Movie poster. Using a placeholder if poster is N/A or empty */}
@@ -176,22 +129,6 @@ function App() {
               </svg>
             )}
           </button>
-
-          {/* Gemini AI Feature Buttons */}
-          <div className="flex flex-col space-y-2 mt-4">
-            <button
-              onClick={handleGetPlotSummary}
-              className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-lg hover:from-emerald-600 hover:to-teal-600 transition duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              ✨ Get Plot Summary
-            </button>
-            <button
-              onClick={handleGenerateReview}
-              className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-blue-600 transition duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            >
-              ✨ Generate Review
-            </button>
-          </div>
         </div>
 
         {/* LLM Content Modal */}
